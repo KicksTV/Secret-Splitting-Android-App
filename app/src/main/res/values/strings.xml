@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">SecretSharing</string>
+    <string-array name="storageServices">
+        <item>Firebase</item>
+        <item>Dropbox</item>
+        <item>Google Drive</item>
+    </string-array>
+</resources>

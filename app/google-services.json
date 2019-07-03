@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "765343754044",
+    "firebase_url": "https://secretsharing-3a286.firebaseio.com",
+    "project_id": "secretsharing-3a286",
+    "storage_bucket": "secretsharing-3a286.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:765343754044:android:873edc6cbf77f9eb",
+        "android_client_info": {
+          "package_name": "com.example.secretsharing"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "765343754044-204mj720kbnen2pks9td6sj27ganjn8m.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.secretsharing",
+            "certificate_hash": "01e349662c1166090151139f1e3d859099bcde0c"
+          }
+        },
+        {
+          "client_id": "765343754044-24o42spam9lj4muq9o426qharp2n4g8l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDtHhN7aMUzZD8iWy60H4f3w91-VNt6e4A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "765343754044-24o42spam9lj4muq9o426qharp2n4g8l.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
