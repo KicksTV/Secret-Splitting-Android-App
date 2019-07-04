@@ -20,7 +20,7 @@ public class MainActivity extends AppCompatActivity {
     String save_pattern_key = "pattern_code";
     String final_pattern = "";
 
-    PatternLockView mPatterLockView;
+    PatternLockView mPatternLockView;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -34,8 +34,9 @@ public class MainActivity extends AppCompatActivity {
         // If the pattern has been set
         if (save_pattern != null && !save_pattern.equals("null")) {
             setContentView(R.layout.pattern_screen);
-            mPatterLockView = (PatternLockView)findViewById(R.id.pattern_lock_view);
-            mPatterLockView.addPatternLockListener(new PatternLockViewListener() {
+            mPatternLockView = (PatternLockView)findViewById(R.id.pattern_lock_view);
+            mPatternLockView.clearPattern();
+            mPatternLockView.addPatternLockListener(new PatternLockViewListener() {
                 @Override
                 public void onStarted() {
 
@@ -48,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
 
                 @Override
                 public void onComplete(List<PatternLockView.Dot> pattern) {
-                    final_pattern = PatternLockUtils.patternToString(mPatterLockView,pattern);
+                    final_pattern = PatternLockUtils.patternToString(mPatternLockView,pattern);
                     if (final_pattern.equals(save_pattern)) {
                         Toast.makeText(MainActivity.this, "Password correct!", Toast.LENGTH_SHORT).show();
                         Intent intent=new Intent(MainActivity.this, HomeScreen.class); // redirecting to pattern_screen.
@@ -68,8 +69,8 @@ public class MainActivity extends AppCompatActivity {
         // If pattern hasn't been set
         }else {
             setContentView(R.layout.activity_main);
-            mPatterLockView = (PatternLockView)findViewById(R.id.pattern_lock_view);
-            mPatterLockView.addPatternLockListener(new PatternLockViewListener() {
+            mPatternLockView = (PatternLockView)findViewById(R.id.pattern_lock_view);
+            mPatternLockView.addPatternLockListener(new PatternLockViewListener() {
                 @Override
                 public void onStarted() {
 
@@ -82,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
 
                 @Override
                 public void onComplete(List<PatternLockView.Dot> pattern) {
-                    final_pattern = PatternLockUtils.patternToString(mPatterLockView, pattern);
+                    final_pattern = PatternLockUtils.patternToString(mPatternLockView, pattern);
                 }
 
                 @Override

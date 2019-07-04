@@ -54,18 +54,16 @@
                 android:layout_height="wrap_content"
                 android:text="Secret Image" />
         </com.google.android.material.tabs.TabLayout>
+
     </com.google.android.material.navigation.NavigationView>
 
-    <com.google.android.material.textfield.TextInputLayout
+    <EditText
+        android:id="@+id/numberCode"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:layout_width="385dp"
-            android:layout_height="52dp"
-
-            android:hint="Enter secret here..." />
-    </com.google.android.material.textfield.TextInputLayout>
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Enter secret here.. (e.g.   24 66 43 88)"
+        android:inputType="numberDecimal" />
 
     <TextView
         android:id="@+id/textView4"
@@ -85,14 +83,14 @@
         android:text="..." />
 
     <Button
-        android:id="@+id/button4"
+        android:id="@+id/hideButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:text="Hide Secret" />
 
     <Button
-        android:id="@+id/button2"
+        android:id="@+id/recombinButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
