@@ -51,6 +51,7 @@ public class HomeScreen extends AppCompatActivity {
                         String secrectCode = numberCode.getText().toString();
 
                         Random r = new Random();
+
                         int randomN = 10000000 + (int)(r.nextFloat() * 90000000);
 
                         System.out.println("SecretCode: " + secrectCode);
