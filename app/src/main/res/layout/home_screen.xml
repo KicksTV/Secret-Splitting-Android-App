@@ -33,67 +33,39 @@
 
     </LinearLayout>
 
-    <com.google.android.material.navigation.NavigationView
+    <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <com.google.android.material.tabs.TabLayout
-            android:id="@+id/tabNav"
+        android:layout_height="match_parent"
+        tools:context=".HomeScreen">
+        <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="40dp"
-            android:addStatesFromChildren="false">
+            android:theme="@style/AppTheme.AppBarOverlay">
 
-            <com.google.android.material.tabs.TabItem
+            <TextView
+                android:id="@+id/title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Secret Text" />
+                android:gravity="center"
+                android:minHeight="?actionBarSize"
+                android:padding="@dimen/appbar_padding"
+                android:text="@string/app_name"
+                android:textAppearance="@style/TextAppearance.Widget.AppCompat.Toolbar.Title" />
 
-            <com.google.android.material.tabs.TabItem
-                android:layout_width="wrap_content"
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/tabs"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Secret Image" />
-        </com.google.android.material.tabs.TabLayout>
+                android:background="?attr/colorPrimary" />
+        </com.google.android.material.appbar.AppBarLayout>
 
-    </com.google.android.material.navigation.NavigationView>
-
-    <EditText
-        android:id="@+id/numberCode"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:hint="Enter secret here.. (e.g.   24 66 43 88)"
-        android:inputType="numberDecimal" />
-
-    <TextView
-        android:id="@+id/textView4"
-        android:layout_width="wrap_content"
-        android:layout_height="38dp"
-        android:layout_marginTop="80dp"
-        android:textSize="18sp"
-        android:layout_gravity="center_horizontal"
-        tools:text="Output" />
-
-    <EditText
-        android:id="@+id/editText"
-        android:layout_width="394dp"
-        android:layout_height="140dp"
-        android:ems="10"
-        android:inputType="textPersonName"
-        android:text="..." />
-
-    <Button
-        android:id="@+id/hideButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:text="Hide Secret" />
-
-    <Button
-        android:id="@+id/recombinButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:text="Recombin Secret" />
+        <androidx.viewpager.widget.ViewPager
+            android:id="@+id/container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
 </LinearLayout>
