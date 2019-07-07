@@ -1,6 +1,5 @@
 package com.example.secretsharing;
 
-import java.math.BigInteger;
 import java.util.Random;
 
 public class Secret {
@@ -10,17 +9,18 @@ public class Secret {
 
         int length = secretCode.length();
 
-        byte[] b = new byte[length];
+
+        Double num = Math.pow(10, length);
 
 
         Random r = new Random();
-        r.nextBytes(b);
-        BigInteger i = new BigInteger(b);
+        int randomN = r.nextInt(num.intValue());
 
-        i.mod(BigInteger.valueOf(length));
+
 
         System.out.println("SecretCode: " + secretCode);
-        System.out.println(i);
+        System.out.println(num);
+        System.out.println(randomN);
 
 //        Double randomN = randLength + (int)(r.nextFloat() * randLength);
 
