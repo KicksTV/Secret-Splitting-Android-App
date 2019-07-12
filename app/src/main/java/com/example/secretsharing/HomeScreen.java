@@ -1,11 +1,13 @@
 package com.example.secretsharing;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager.widget.ViewPager;
 
@@ -24,6 +26,8 @@ public class HomeScreen extends AppCompatActivity {
         setContentView(R.layout.home_screen);
         Log.d(TAG, "onCreate: Starting.");
 
+        String account = getIntent().getStringExtra("account");
+
 
 
         mSectionsPageAdapter = new SectionsPageAdapter(getSupportFragmentManager());
@@ -35,6 +39,10 @@ public class HomeScreen extends AppCompatActivity {
         // Navigation Tabs
         TabLayout tabNav = (TabLayout)findViewById(R.id.tabs);
         tabNav.setupWithViewPager(mViewPager);
+
+
+        new AlertDialog.Builder(this).setMessage(account + ", now logged in!").show();
+
 
 
 

@@ -1,8 +1,12 @@
 package com.example.secretsharing;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Random;
 
 public class Secret {
+
+    private ArrayList<String> shares = new ArrayList<>();
 
     private char[] charList =
 
@@ -21,35 +25,43 @@ public class Secret {
             "35", "36"};
 
 
-    public String hideSecret(String secretCode) {
+    public ArrayList<String> hideSecret(String secretCode) {
 
         int length = secretCode.length();
-        Double num = Math.pow(10, length);
-
+//        Double num = Math.pow(10, length);
+//
 //        System.out.println(num.longValue());
+//        System.out.println(secretConversion('l'));
 
 
-        System.out.println(secretConversion('l'));
 
         Random r = new Random();
-        long randomN = 0;
-        do {
-            randomN = (long)(r.nextDouble() * num.longValue());
-        }while (randomN < (num.longValue() / 10));
+        BigInteger randomN = new BigInteger(256, new Random());
 
-        System.out.println("SecretCode: " + secretCode);
-        System.out.println(randomN);
+        String rand = randomN.toString();
 
-        String rand = String.valueOf(randomN);
+        String[] numbers = rand.split("(?<=\\G.{" + length + "})");
 
-        String share1 = "";
 
+//        do {
+//            randomN = (BigInteger)(r.nextBytes() * num.byteValue());
+//        }while (randomN < (num.longValue() / 10));
+
+
+
+//        System.out.println("SecretCode: " + secretCode);
+//        System.out.println(randomN);
+
+        rand = numbers[0];
+
+        String randomNumShare = "";
         String share2 = "";
+
         for (int i = 0;i <= length-1;i++) {
             String secC = secretConversion(secretCode.charAt(i));
             String ranC = secretConversion(rand.charAt(i));
 
-            share1 = share1 + ranC;
+            randomNumShare = randomNumShare + ranC;
 
             if (secC != null && ranC != null) {
 
@@ -64,10 +76,13 @@ public class Secret {
                 }
             }
         }
-        System.out.println("Share1: " + share1);
+        System.out.println("Share1: " + randomNumShare);
         System.out.println("Share2: " + share2);
 
-        return "";
+        shares.add(randomNumShare);
+        shares.add(share2);
+
+        return shares;
     }
 
     public String secretConversion(char c) {

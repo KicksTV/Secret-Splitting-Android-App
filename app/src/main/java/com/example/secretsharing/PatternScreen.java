@@ -9,7 +9,5 @@ public class PatternScreen extends AppCompatActivity {
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.pattern_screen);
-
-
     }
 }

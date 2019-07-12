@@ -16,6 +16,7 @@ import java.util.List;
 
 import io.paperdb.Paper;
 
+
 public class MainActivity extends AppCompatActivity {
     String save_pattern_key = "pattern_code";
     String final_pattern = "";
@@ -26,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Paper.init(this);
+
 
 
         //  Stores the saved pattern
@@ -52,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
                     final_pattern = PatternLockUtils.patternToString(mPatternLockView,pattern);
                     if (final_pattern.equals(save_pattern)) {
                         Toast.makeText(MainActivity.this, "Password correct!", Toast.LENGTH_SHORT).show();
-                        Intent intent=new Intent(MainActivity.this, HomeScreen.class); // redirecting to pattern_screen.
+                        Intent intent=new Intent(MainActivity.this, Login.class); // redirecting to pattern_screen.
                         startActivity(intent);
                     }else {
                         Toast.makeText(MainActivity.this, "Password incorrect!", Toast.LENGTH_SHORT).show();
