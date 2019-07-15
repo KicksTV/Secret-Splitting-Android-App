@@ -20,7 +20,7 @@
         <activity android:name=".HomeScreen"/>
         <activity android:name=".PatternScreen"/>
         <activity android:name=".settingsScreen"/>
-        <activity android:name=".Login" />
+        <activity android:name=".Authentication" />
     </application>
 
 </manifest>
