@@ -50,7 +50,7 @@ public class Authentication extends AppCompatActivity {
     @Override
     protected void onCreate( Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.initial_setup);
+        setContentView(R.layout.authentication_screen);
 
         signin = findViewById(R.id.sign_in_button);
         btn_logout = findViewById(R.id.btn_logout);
@@ -202,5 +202,9 @@ public class Authentication extends AppCompatActivity {
             }
         });
 
+    }
+    @Override
+    public void onBackPressed() {
+        return;
     }
 }

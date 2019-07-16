@@ -38,7 +38,7 @@
         android:layout_gravity="center_horizontal"
 
 
-        />
+        android:visibility="invisible" />
 
 
     <com.google.android.gms.common.SignInButton

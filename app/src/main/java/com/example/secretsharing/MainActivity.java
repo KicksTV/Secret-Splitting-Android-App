@@ -27,9 +27,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Paper.init(this);
-
-
-
         //  Stores the saved pattern
         final String save_pattern = Paper.book().read(save_pattern_key);
 
@@ -109,6 +106,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
+
 
 
 }

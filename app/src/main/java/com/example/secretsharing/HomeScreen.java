@@ -28,8 +28,6 @@ public class HomeScreen extends AppCompatActivity {
 
         String account = getIntent().getStringExtra("account");
 
-
-
         mSectionsPageAdapter = new SectionsPageAdapter(getSupportFragmentManager());
 
         mViewPager = (ViewPager) findViewById(R.id.container);
@@ -39,11 +37,6 @@ public class HomeScreen extends AppCompatActivity {
         // Navigation Tabs
         TabLayout tabNav = (TabLayout)findViewById(R.id.tabs);
         tabNav.setupWithViewPager(mViewPager);
-
-
-        new AlertDialog.Builder(this).setMessage(account + ", now logged in!").show();
-
-
 
 
         // Settings icon button
