@@ -26,6 +26,7 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 
@@ -84,7 +85,7 @@ public class Authentication extends AppCompatActivity {
             // already signed in
 
             FirebaseUser user = mAuth.getCurrentUser();
-            updateUI(user);
+            updateUI(user, false);
         } else {
             // not signed in
 
@@ -139,7 +140,8 @@ public class Authentication extends AppCompatActivity {
             // The ApiException status code indicates the detailed failure reason.
             // Please refer to the GoogleSignInStatusCodes class reference for more information.
             Log.w(TAG, "signInResult:failed code=" + e.getStatusCode());
-            updateUI(null);
+            progressBar.setVisibility(View.VISIBLE);
+            updateUI(null, true);
         }
     }
 
@@ -156,40 +158,57 @@ public class Authentication extends AppCompatActivity {
                     Log.d("TAG", "signin success");
 
                     FirebaseUser user = mAuth.getCurrentUser();
-                    updateUI(user);
+                    updateUI(user, false);
                 } else {
                     progressBar.setVisibility(View.INVISIBLE);
                     Log.d("TAG", "signin failure", task.getException());
                     Toast.makeText(Authentication.this, "SignIn Failed!", Toast.LENGTH_SHORT).show();
-                    updateUI(null);
+                    updateUI(null, true);
                 }
             }
         });
     }
 
-    private void updateUI(FirebaseUser user) {
-        if (user != null) {
-            String name = user.getDisplayName();
-            String email = user.getEmail();
-            String img = String.valueOf(user.getPhotoUrl());
+    private void updateUI(FirebaseUser user, boolean error) {
+        if (!error) {
+            if (user != null) {
+                String name = user.getDisplayName();
+                String email = user.getEmail();
+                String img = String.valueOf(user.getPhotoUrl());
 
 
-            signin.setVisibility(View.INVISIBLE);
-            btn_logout.setVisibility(View.VISIBLE);
-            btn_continue.setVisibility(View.VISIBLE);
-            userName.setText(name);
-            userEmail.setText(email);
-            userEmail.setVisibility(View.VISIBLE);
-            Picasso.get().load(img).into(userImage);
+                signin.setVisibility(View.INVISIBLE);
+                btn_logout.setVisibility(View.VISIBLE);
+                btn_continue.setVisibility(View.VISIBLE);
+                userName.setText(name);
+                userEmail.setText(email);
+                userEmail.setVisibility(View.VISIBLE);
+                Picasso.get().load(img).into(userImage);
+//                Picasso.get().load(R.drawable.ic_padlock_red).into(userImage, new Callback() {
+//
+//                    @Override
+//                    public void onSuccess() {
+//                        System.out.println("Lock image loaded successfully");
+//                    }
+//
+//                    @Override
+//                    public void onError(Exception e) {
+//                        System.out.println("Lock image loaded unsuccessfully");
+//                        e.printStackTrace();
+//                    }
+//                });
 
+            }else {
+                btn_logout.setVisibility(View.INVISIBLE);
+                btn_continue.setVisibility(View.INVISIBLE);
+                userEmail.setVisibility(View.INVISIBLE);
+                signin.setVisibility(View.VISIBLE);
+
+                userName.setText("Google Login");
+                Picasso.get().load(R.drawable.ic_google_logo).into(userImage);
+            }
         }else {
-            btn_logout.setVisibility(View.INVISIBLE);
-            btn_continue.setVisibility(View.INVISIBLE);
-            userEmail.setVisibility(View.INVISIBLE);
-            signin.setVisibility(View.VISIBLE);
-
-            userName.setText("Google Login");
-            Picasso.get().load(R.drawable.ic_google_logo).into(userImage);
+            userEmail.setText("Error logging in!");
         }
     }
 
@@ -198,7 +217,7 @@ public class Authentication extends AppCompatActivity {
         client.signOut().addOnCompleteListener(this, new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
-                Authentication.this.updateUI(null);
+                Authentication.this.updateUI(null, false);
             }
         });
 

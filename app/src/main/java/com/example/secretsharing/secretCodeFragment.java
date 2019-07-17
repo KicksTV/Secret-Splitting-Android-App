@@ -47,21 +47,23 @@ public class secretCodeFragment extends Fragment {
         String share1 = sharedpreferences.getString("share1", "none");
 
 
+        Picasso.get().load(R.drawable.ic_padlock_red).into(lockIcon, new Callback() {
+
+            @Override
+            public void onSuccess() {
+                System.out.println("Lock image loaded successfully");
+            }
+
+            @Override
+            public void onError(Exception e) {
+                System.out.println("Lock image loaded unsuccessfully");
+                e.printStackTrace();
+            }
+        });
+
         // Checking if share exists
         if (!share1.equals("none")) {
-            Picasso.get().load("https://image.flaticon.com/icons/svg/25/25239.svg").into(lockIcon, new Callback() {
 
-                @Override
-                public void onSuccess() {
-                    System.out.println("Lock image loaded successfully");
-                }
-
-                @Override
-                public void onError(Exception e) {
-                    System.out.println("Lock image loaded unsuccessfully");
-                    e.printStackTrace();
-                }
-            });
             toggleButton(view);
             output.setText(share1);
         }
