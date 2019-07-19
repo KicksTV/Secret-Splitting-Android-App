@@ -47,7 +47,7 @@ public class secretCodeFragment extends Fragment {
         String share1 = sharedpreferences.getString("share1", "none");
 
 
-        Picasso.get().load(R.drawable.ic_padlock_red).into(lockIcon, new Callback() {
+        Picasso.get().load(R.drawable.ic_lock_png).into(lockIcon, new Callback() {
 
             @Override
             public void onSuccess() {
