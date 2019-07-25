@@ -33,8 +33,6 @@ public class Secret {
 //        System.out.println(num.longValue());
 //        System.out.println(secretConversion('l'));
 
-
-
         Random r = new Random();
         BigInteger randomN = new BigInteger(256, new Random());
 
@@ -83,6 +81,40 @@ public class Secret {
         shares.add(share2);
 
         return shares;
+    }
+
+    public String recombindSecret(String share1, String share2) {
+        String secret = "";
+
+        System.out.println("Share1 = " + share1);
+        System.out.println("Share2 = " + share2);
+
+
+
+//        for (int l=0;l<1;l++) {
+//            for (int i = 0;i <= length-1;i++) {
+//                String secC = secretConversion(secretCode.charAt(i));
+//                String ranC = secretConversion(rand.charAt(i));
+//
+//                randomNumShare = randomNumShare + ranC;
+//
+//                if (secC != null && ranC != null) {
+//
+//                    for (int l=0;l<=1;l++) {
+//
+//                        char secCC = secC.charAt(l);
+//                        char ranCC = ranC.charAt(l);
+//
+//                        int numResult = (Integer.valueOf(secCC) < Integer.valueOf(ranCC)) ? (Integer.valueOf(secCC)+10) - Integer.valueOf(ranCC) : (Integer.valueOf(secCC) - Integer.valueOf(ranCC));
+//
+//                        share2 = share2 + "" + numResult;
+//                    }
+//                }
+//            }
+//
+//        }
+
+        return secret;
     }
 
     public String secretConversion(char c) {

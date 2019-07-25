@@ -61,6 +61,40 @@ public class Authentication extends AppCompatActivity {
         userImage = findViewById(R.id.userImage);
         progressBar = findViewById(R.id.progress_circular);
 
+
+
+        // Configure sign-in to request the user's ID, email address, and basic
+        // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
+
+        // Build a GoogleSignInClient with the options specified by gso.
+        client = GoogleSignIn.getClient(this, gso);
+
+
+
+
+
+        mAuth = FirebaseAuth.getInstance();
+
+        if (mAuth.getCurrentUser() != null) {
+            // already signed in
+            FirebaseUser user = mAuth.getCurrentUser();
+            updateUI(user, false);
+        } else {
+            // not signed in
+            signin.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    signIn(client);
+                }
+            });
+
+        }
+
+
         btn_logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -75,40 +109,6 @@ public class Authentication extends AppCompatActivity {
                 finish();
             }
         });
-
-        // Check for existing Google Sign In account, if the user is already signed in
-        // the GoogleSignInAccount will be non-null.
-
-        mAuth = FirebaseAuth.getInstance();
-
-        if (mAuth.getCurrentUser() != null) {
-            // already signed in
-
-            FirebaseUser user = mAuth.getCurrentUser();
-            updateUI(user, false);
-        } else {
-            // not signed in
-
-            // Configure sign-in to request the user's ID, email address, and basic
-            // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
-            GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                    .requestIdToken(getString(R.string.default_web_client_id))
-                    .requestEmail()
-                    .build();
-
-            // Build a GoogleSignInClient with the options specified by gso.
-            client = GoogleSignIn.getClient(this, gso);
-
-
-
-            signin.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    signIn(client);
-                }
-            });
-
-        }
     }
     private void signIn(GoogleSignInClient c) {
         progressBar.setVisibility(View.VISIBLE);
@@ -205,7 +205,19 @@ public class Authentication extends AppCompatActivity {
                 signin.setVisibility(View.VISIBLE);
 
                 userName.setText("Google Login");
-                Picasso.get().load(R.drawable.ic_google_logo).into(userImage);
+                Picasso.get().load(R.drawable.ic_google_logo).into(userImage, new Callback() {
+
+                    @Override
+                    public void onSuccess() {
+                        System.out.println("Lock image loaded successfully");
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        System.out.println("Lock image loaded unsuccessfully");
+                        e.printStackTrace();
+                    }
+                });
             }
         }else {
             userEmail.setText("Error logging in!");
