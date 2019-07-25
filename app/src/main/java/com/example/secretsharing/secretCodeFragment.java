@@ -1,6 +1,5 @@
 package com.example.secretsharing;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -15,26 +14,19 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.storage.FileDownloadTask;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.OnProgressListener;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 
 
@@ -46,12 +38,12 @@ public class secretCodeFragment extends Fragment {
     private FirebaseStorage storage;
     private FirebaseAuth mAuth;
     private FirebaseUser user;
-
-
+    private String localShare = "";
+    private View view;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        final View view = inflater.inflate(R.layout.secretcode_fragment, container,false);
+        view = inflater.inflate(R.layout.secretcode_fragment, container,false);
 
         // Getting activity components
         final EditText secretCodeInput = (EditText)view.findViewById(R.id.secretCode);
@@ -159,7 +151,6 @@ public class secretCodeFragment extends Fragment {
             });
 
         }else {
-            Secret secret = new Secret();
 
             Picasso.get().load(R.drawable.ic_unlock_png).into(lockIcon, new Callback() {
 
@@ -175,19 +166,16 @@ public class secretCodeFragment extends Fragment {
                 }
             });
             message.setText("Secret has been revealed");
-            String share1 = "";
             if (getLocalShare() != null) {
-                share1 = getLocalShare();
+                localShare = getLocalShare();
             }else {
                 Log.d(TAG, "getLocalShare returned null");
             }
 
-            String share2 = getRemoteShare();
+            getRemoteShare();
 
-            secret.recombindSecret(share1, share2);
         }
     }
-
     public boolean doesShareExist() {
         sharedpreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
         String share1 = sharedpreferences.getString("share1", "none");
@@ -206,49 +194,87 @@ public class secretCodeFragment extends Fragment {
         return share1;
     }
 
-    private String getRemoteShare() {
-        if (mAuth.getCurrentUser() != null) {
-            // already signed in
-            user = mAuth.getCurrentUser();
-            storage = FirebaseStorage.getInstance();
-            StorageReference remoteShareLoc = storage.getReference().child("user/" + user.getUid() + "/share2.txt");
+    private void getRemoteShare() {
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("users").child(mAuth.getCurrentUser().getUid());
 
-            File file = new File.createTempFile(getContext().getFilesDir(), "share2");
+        final String[] result = new String[1];
 
-            remoteShareLoc.getFile(file).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-                @Override
-                public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                    // Local temp file has been created
-                    Log.d(TAG, "getting remote share successful");
-                    System.out.println("Download file successful");
+        ValueEventListener postListener = new ValueEventListener() {
+
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // Get Post object and use the values to update the UI
+
+                Secret secret = new Secret();
+
+                for (DataSnapshot sp : dataSnapshot.getChildren()) {
+                    final String share = sp.getValue(String.class);
+                    System.out.println(share);
+
+                    result[0] = share;
                 }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception exception) {
-                    // Handle any errors
-                    Log.d(TAG, "getting remote share unsuccessful");
-                    exception.printStackTrace();
-                }
-            });
 
-            BufferedReader br = null;
-            String strLine = "";
+                String s = secret.recombindSecret(localShare, result[0]);
 
-            try {
-                br = new BufferedReader(new FileReader(file.getPath()));
-                while ((strLine = br.readLine()) != null) {
-                    System.out.println("file = " + strLine);
-                }
-            } catch (FileNotFoundException e) {
-                System.err.println("Unable to find the file: fileName");
-            } catch (IOException e) {
-                System.err.println("Unable to read the file: fileName");
+                showSecret(s);
+
             }
-
-            return strLine;
-        }
-        return null;
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // Getting Post failed, log a message
+                Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
+                // ...
+            }
+        };
+        ref.addValueEventListener(postListener);
     }
+//
+//    private void getRemoteShare(String url) {
+//        if (mAuth.getCurrentUser() != null) {
+//            // already signed in
+//            user = mAuth.getCurrentUser();
+//
+//            System.out.println(url);
+//
+//            storage = FirebaseStorage.getInstance();
+//
+//            StorageReference remoteShareLoc = storage.getReference();
+//
+//
+//
+//            remoteShareLoc.child(url).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+//                @Override
+//                public void onSuccess(Uri ur) {
+//                    // Local temp file has been created
+//                    Log.d(TAG, "getting remote share successful");
+//                    System.out.println("Download file successful");
+//                    System.out.println(ur.toString());
+//                }
+//            }).addOnFailureListener(new OnFailureListener() {
+//                @Override
+//                public void onFailure(@NonNull Exception exception) {
+//                    // Handle any errors
+//                }
+//            });
+//
+//            BufferedReader br = null;
+//            String strLine = "";
+
+//            try {
+//                br = new BufferedReader(new FileReader(file.getPath()));
+//                while ((strLine = br.readLine()) != null) {
+//                    System.out.println("file = " + strLine);
+//                }
+//            } catch (FileNotFoundException e) {
+//                System.err.println("Unable to find the file: fileName");
+//            } catch (IOException e) {
+//                System.err.println("Unable to read the file: fileName");
+//            }
+//
+//            return strLine;
+//        }
+//
+//    }
 
 
     public void storeLocalShare(String localShare) {
@@ -271,47 +297,87 @@ public class secretCodeFragment extends Fragment {
             user = mAuth.getCurrentUser();
 
             //displaying a progress dialog while upload is going on
-            final ProgressDialog progressDialog = new ProgressDialog(getActivity());
-            progressDialog.setTitle("Uploading");
-            progressDialog.show();
+//            final ProgressDialog progressDialog = new ProgressDialog(getActivity());
+//            progressDialog.setTitle("Uploading");
+//            progressDialog.show();
 
-            storage = FirebaseStorage.getInstance();
-            StorageReference remoteShareLoc = storage.getReference().child("user/" + user.getUid() + "/share2.txt");
 
-            UploadTask uploadTask = remoteShareLoc.putBytes(share2);
-            uploadTask.addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception exception) {
-                    progressDialog.dismiss();
+            DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("users").child(mAuth.getCurrentUser().getUid());
 
-                    Toast.makeText(getContext(), exception.getMessage(), Toast.LENGTH_LONG).show();
-                    Log.d(TAG, "Uploading share failed!");
-                    exception.printStackTrace();
-                }
-            }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-                    //calculating progress percentage
-                    double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+            //Log.i("seeThisUri", remoteShare);// This is the one you should store
 
-                    //displaying percentage in progress dialog
-                    progressDialog.setMessage("Uploaded " + ((int) progress) + "%...");
-                }
-            })
-            .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
-                    progressDialog.dismiss();
+            ref.child("shareURL").setValue(remoteShare);
 
-                    Toast.makeText(getContext(), "File Uploaded ", Toast.LENGTH_LONG).show();
+//            storage = FirebaseStorage.getInstance();
+//            StorageReference remoteShareLoc = storage.getReference().child("user/" + user.getUid() + "/share2.txt");
 
-                    Log.d(TAG, "Uploading share successful!");
-                    Log.d(TAG, "File Data: " + taskSnapshot.getMetadata().getContentType());
-                    Log.d(TAG, "File Data: " + taskSnapshot.getMetadata().getName());
-                    Log.d(TAG, "File Data: " + taskSnapshot.getMetadata().getPath());
-                }
-            });
+//            UploadTask uploadTask = remoteShareLoc.putBytes(share2);
+//            uploadTask.addOnFailureListener(new OnFailureListener() {
+//                @Override
+//                public void onFailure(@NonNull Exception exception) {
+//                    progressDialog.dismiss();
+//
+//                    Toast.makeText(getContext(), exception.getMessage(), Toast.LENGTH_LONG).show();
+//                    Log.d(TAG, "Uploading share failed!");
+//                    exception.printStackTrace();
+//                }
+//            }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+//                @Override
+//                public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+//                    //calculating progress percentage
+//                    double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+//
+//                    //displaying percentage in progress dialog
+//                    progressDialog.setMessage("Uploaded " + ((int) progress) + "%...");
+//                }
+//            })
+//            .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+//
+//
+//                @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+//                @Override
+//                public void onSuccess(final UploadTask.TaskSnapshot taskSnapshot) {
+//                    // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
+//
+//                    progressDialog.dismiss();
+//
+//                    Toast.makeText(getContext(), "File Uploaded ", Toast.LENGTH_LONG).show();
+//
+//                    Log.d(TAG, "Uploading share successful!");
+//                    Log.d(TAG, "File Data: " + taskSnapshot.getMetadata().getContentType());
+//                    Log.d(TAG, "File Data: " + taskSnapshot.getMetadata().getName());
+//                    Log.d(TAG, "File Data: " + taskSnapshot.getMetadata().getPath());
+//
+//
+//                    Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+//                        @Override
+//                        public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) {
+//                            if (!task.isSuccessful()) {
+//                                Log.i("problem", task.getException().toString());
+//                            }
+//
+//                            return remoteShareLoc.getDownloadUrl();
+//                        }
+//                    }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+//                        @Override
+//                        public void onComplete(@NonNull Task<Uri> task) {
+//                            if (task.isSuccessful()) {
+//                                Uri downloadUri = task.getResult();
+//
+//
+//
+//
+//                            } else {
+//                                Log.i("wentWrong", "downloadUri failure");
+//                            }
+//                        }
+//                    });
+//                }
+//            });
         }
+    }
+    private void showSecret(String s) {
+        final TextView output = (TextView)view.findViewById(R.id.txt_shareOutput);
+        output.setText(s);
     }
 }

@@ -55,9 +55,15 @@ public class Secret {
         String randomNumShare = "";
         String share2 = "";
 
+        String result= "";
+
         for (int i = 0;i <= length-1;i++) {
             String secC = secretConversion(secretCode.charAt(i));
             String ranC = secretConversion(rand.charAt(i));
+
+            result += secC;
+
+
 
             randomNumShare = randomNumShare + ranC;
 
@@ -74,8 +80,10 @@ public class Secret {
                 }
             }
         }
-        System.out.println("Share1: " + randomNumShare);
-        System.out.println("Share2: " + share2);
+
+        System.out.println("SecretCode Conversion: " + result);
+//        System.out.println("Share1: " + randomNumShare);
+//        System.out.println("Share2: " + share2);
 
         shares.add(randomNumShare);
         shares.add(share2);
@@ -91,28 +99,33 @@ public class Secret {
 
 
 
-//        for (int l=0;l<1;l++) {
-//            for (int i = 0;i <= length-1;i++) {
-//                String secC = secretConversion(secretCode.charAt(i));
-//                String ranC = secretConversion(rand.charAt(i));
-//
-//                randomNumShare = randomNumShare + ranC;
-//
-//                if (secC != null && ranC != null) {
-//
-//                    for (int l=0;l<=1;l++) {
-//
-//                        char secCC = secC.charAt(l);
-//                        char ranCC = ranC.charAt(l);
-//
-//                        int numResult = (Integer.valueOf(secCC) < Integer.valueOf(ranCC)) ? (Integer.valueOf(secCC)+10) - Integer.valueOf(ranCC) : (Integer.valueOf(secCC) - Integer.valueOf(ranCC));
-//
-//                        share2 = share2 + "" + numResult;
-//                    }
-//                }
-//            }
-//
-//        }
+        String result = "";
+        for (int i = 0;i <= share1.length()-1;i++) {
+
+            char num1 = share1.charAt(i);
+            char num2 = share2.charAt(i);
+
+            int numResult = Character.getNumericValue(num1) + Character.getNumericValue(num2);
+
+            if (Integer.valueOf(numResult) > 9) {numResult = numResult - 10;}
+
+            result = result + numResult;
+        }
+
+        System.out.println(result);
+
+        for (int i=0;i <= result.length()-1; i += 2) {
+
+            String s = String.valueOf(result);
+            char c1 = s.charAt(i);
+            int nextnum = i+1;
+            char c2 = s.charAt(nextnum);
+            s = c1 + "" + c2;
+            secret += reconstructSecret(s);
+        }
+
+        System.out.println(secret);
+
 
         return secret;
     }
@@ -122,6 +135,17 @@ public class Secret {
         for (int i=0; i<charList.length;i++) {
             if (charList[i] == c) {
                 return numberList[i];
+            }
+        }
+        return null;
+    }
+
+    public String reconstructSecret(String s) {
+
+        System.out.println(s);
+        for (int i=0; i<numberList.length;i++) {
+            if (numberList[i].equals(s)) {
+                return "" + charList[i];
             }
         }
         return null;
