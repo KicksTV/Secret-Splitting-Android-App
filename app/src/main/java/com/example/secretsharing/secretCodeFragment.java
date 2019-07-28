@@ -1,5 +1,6 @@
 package com.example.secretsharing;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -8,14 +9,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -41,20 +46,33 @@ public class secretCodeFragment extends Fragment {
     private String localShare = "";
     private View view;
 
+    private EditText secretInput;
+    private TextView output;
+    private Spinner mspin;
+    private ImageView lockIcon;
+    private TextView message;
+    private Button btn_newShare;
+    private ProgressDialog progressDialog;
+    private boolean doesSecretExist;
+    private Secret secret;
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.secretcode_fragment, container,false);
 
         // Getting activity components
-        final EditText secretCodeInput = (EditText)view.findViewById(R.id.secretCode);
-        final TextView output = (TextView)view.findViewById(R.id.txt_message);
-        final Spinner mspin= (Spinner)view.findViewById(R.id.numberOfShares);
-        final ImageView lockIcon = (ImageView)view.findViewById(R.id.img_lock);
+        secretInput = view.findViewById(R.id.inp_secretCode);
+        output = view.findViewById(R.id.txt_shareOutput);
+        mspin = view.findViewById(R.id.spn_numberOfShares);
+        lockIcon = view.findViewById(R.id.img_lock);
+        message = view.findViewById(R.id.txt_message);
+        btn_newShare = view.findViewById(R.id.btn_newShare);
 
-
+        secret = new Secret();
 
         // Setting up spinner
-        Integer[] items = new Integer[]{2,3,4,5,6};
+        Integer[] items = new Integer[]{2};
         ArrayAdapter<Integer> adapter = new ArrayAdapter<Integer>(getActivity(), android.R.layout.simple_spinner_item, items);
         mspin.setAdapter(adapter);
 
@@ -62,80 +80,8 @@ public class secretCodeFragment extends Fragment {
 
         mAuth = FirebaseAuth.getInstance();
 
-//        if (doesShareExist()) {
-//            Picasso.get().load(R.drawable.ic_lock_png).into(lockIcon, new Callback() {
-//
-//                @Override
-//                public void onSuccess() {
-//                    System.out.println("Lock image loaded successfully");
-//                }
-//
-//                @Override
-//                public void onError(Exception e) {
-//                    System.out.println("Lock image loaded unsuccessfully");
-//                    e.printStackTrace();
-//                }
-//            });
-//            updateUI(view, true);
-//        }
-
-
-
-        lockIcon.setOnClickListener(v -> {
-
-            if (lockIcon.getDrawable().getConstantState() == getResources().getDrawable( R.drawable.ic_unlock_png).getConstantState()) {
-                Secret s = new Secret();
-                if (secretCodeInput.getText().toString().length() > 0) {
-                    if (secretCodeInput.getText().toString().matches("[a-zA-Z0-9]*")) {
-                        ArrayList<String> result = s.hideSecret(secretCodeInput.getText().toString());
-                        if (result != null) {
-
-
-                            // Changes imageView to locked padlock image
-                            Picasso.get().load(R.drawable.ic_padlock_red).into(lockIcon);
-
-                            // Sets the textView to the local share
-                            output.setText(result.get(0));
-
-                            // Changes the ui
-                            updateUI(view, true);
-
-                            // Stores the local share using Shared Preference
-                            storeLocalShare(result.get(0));
-                            storeRemoteShare(result.get(1));
-
-                        }
-                    }else {
-                        Toast.makeText(getActivity(), "Please remove special characters!", Toast.LENGTH_SHORT).show();
-                    }
-                }else {
-                    Toast.makeText(getActivity(), "Field cannot be left empty!", Toast.LENGTH_SHORT).show();
-                }
-
-            }else {
-                updateUI(view, false);
-            }
-        });
-
-        return view;
-    }
-
-
-    public void updateUI(View view, boolean lock) {
-        final EditText secretCodeInput = (EditText)view.findViewById(R.id.secretCode);
-        final Spinner mspin = (Spinner)view.findViewById(R.id.numberOfShares);
-        final ImageView lockIcon = (ImageView)view.findViewById(R.id.img_lock);
-        final TextView message = view.findViewById(R.id.txt_message);
-        final TextView output = (TextView)view.findViewById(R.id.txt_message);
-
-        if (lock) {
-            secretCodeInput.setText("");
-            secretCodeInput.setVisibility(View.INVISIBLE);
-            secretCodeInput.setEnabled(false);
-            mspin.setEnabled(false);
-            mspin.setVisibility(View.INVISIBLE);
-            message.setText("Secret has been locked!");
-
+        if (doesShareExist()) {
+            System.out.println("Checking for existing share");
             Picasso.get().load(R.drawable.ic_lock_png).into(lockIcon, new Callback() {
 
                 @Override
@@ -149,22 +95,117 @@ public class secretCodeFragment extends Fragment {
                     e.printStackTrace();
                 }
             });
-
+            lockIcon.setTag(R.drawable.ic_lock_png);
+            doesSecretExist = true;
+            updateUI( true);
         }else {
+            lockIcon.setTag(R.drawable.ic_unlock_png);
+            doesSecretExist = false;
+        }
 
-            Picasso.get().load(R.drawable.ic_unlock_png).into(lockIcon, new Callback() {
+
+        lockIcon.setOnClickListener(v -> {
+            System.out.println("button press event");
+//            System.out.println("LockIcon: " + lockIcon.getTag());
+//            System.out.println("image: " + R.drawable.ic_unlock_png);
+
+            if ((Integer)lockIcon.getTag() == R.drawable.ic_unlock_png) {
+                System.out.println("unlock image clicked");
+                if (secretInput.getText().toString().length() > 0) {
+                    System.out.println("secret has been inputted");
+                    if (secretInput.getText().toString().matches("[a-zA-Z0-9]*")) {
+                        System.out.println("secret matches regex");
+                        ArrayList<String> result = new ArrayList<>();
+                        result = secret.hideSecret(secretInput.getText().toString());
+                        if (result != null) {
+
+                            //System.out.println("result does not return null");
+
+                            // Sets the textView to the local share
+                            // output.setText(result.get(0));
+
+                            // Changes the ui
+                            updateUI( true);
+
+                            // Stores the local share using Shared Preference
+                            storeLocalShare(result.get(0));
+                            storeRemoteShare(result.get(1));
+                            doesSecretExist = true;
+                        }
+                    }else {
+                        Toast.makeText(getActivity(), "Please remove special characters!", Toast.LENGTH_SHORT).show();
+                    }
+                }
+                else if (doesSecretExist == true) {
+                    System.out.println("Secret Exists");
+                    updateUI( true);
+                }else {
+                    Toast.makeText(getActivity(), "Field cannot be left empty!", Toast.LENGTH_SHORT).show();
+                }
+
+            }else {
+                System.out.println("unlocking secret");
+                updateUI(false);
+            }
+        });
+
+
+        btn_newShare.setOnClickListener(view -> {
+            doesSecretExist = false;
+            restartUI();
+        });
+
+
+
+        return view;
+    }
+
+
+    public void updateUI(boolean lock) {
+
+        if (lock) {
+            secretInput.setText("");
+            secretInput.setVisibility(View.INVISIBLE);
+            secretInput.setEnabled(false);
+            mspin.setEnabled(false);
+            mspin.setVisibility(View.INVISIBLE);
+            message.setText("Secret has been locked!");
+            btn_newShare.setVisibility(View.INVISIBLE);
+            output.setText("");
+            output.setVisibility(View.INVISIBLE);
+
+            Picasso.get().load(R.drawable.ic_lock_png).into(lockIcon, new Callback() {
 
                 @Override
                 public void onSuccess() {
-                    System.out.println("Lock image loaded successfully");
+                    //System.out.println("Lock image loaded successfully");
                 }
 
                 @Override
                 public void onError(Exception e) {
-                    System.out.println("Lock image loaded unsuccessfully");
+                    //System.out.println("Lock image loaded unsuccessfully");
                     e.printStackTrace();
                 }
             });
+            lockIcon.setTag(R.drawable.ic_lock_png);
+
+        }else {
+            btn_newShare.setVisibility(View.VISIBLE);
+            Picasso.get().load(R.drawable.ic_unlock_png).into(lockIcon, new Callback() {
+
+                @Override
+                public void onSuccess() {
+                    //System.out.println("Lock image loaded successfully");
+                }
+
+                @Override
+                public void onError(Exception e) {
+                    //System.out.println("Lock image loaded unsuccessfully");
+                    e.printStackTrace();
+                }
+            });
+            lockIcon.setTag(R.drawable.ic_unlock_png);
+
             message.setText("Secret has been revealed");
             if (getLocalShare() != null) {
                 localShare = getLocalShare();
@@ -172,9 +213,39 @@ public class secretCodeFragment extends Fragment {
                 Log.d(TAG, "getLocalShare returned null");
             }
 
+            output.setVisibility(View.VISIBLE);
+
+            progressDialog = new ProgressDialog(getActivity());
+            progressDialog.setTitle("Retrieving Secret");
+            progressDialog.show();
+
             getRemoteShare();
 
         }
+    }
+
+    public void restartUI() {
+        message.setText("Enter a Secret..");
+        output.setVisibility(View.INVISIBLE);
+        secretInput.setVisibility(View.VISIBLE);
+        mspin.setVisibility(View.VISIBLE);
+        secretInput.setEnabled(true);
+        mspin.setEnabled(true);
+
+        Picasso.get().load(R.drawable.ic_unlock_png).into(lockIcon, new Callback() {
+
+            @Override
+            public void onSuccess() {
+                //System.out.println("Lock image loaded successfully");
+            }
+
+            @Override
+            public void onError(Exception e) {
+                //System.out.println("Lock image loaded unsuccessfully");
+                e.printStackTrace();
+            }
+        });
+
     }
     public boolean doesShareExist() {
         sharedpreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
@@ -205,18 +276,18 @@ public class secretCodeFragment extends Fragment {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // Get Post object and use the values to update the UI
 
-                Secret secret = new Secret();
 
                 for (DataSnapshot sp : dataSnapshot.getChildren()) {
                     final String share = sp.getValue(String.class);
-                    System.out.println(share);
+//                    System.out.println(share);
 
                     result[0] = share;
                 }
-
+                System.out.println("getRemoteShare");
                 String s = secret.recombindSecret(localShare, result[0]);
 
                 showSecret(s);
+                progressDialog.dismiss();
 
             }
             @Override
@@ -226,158 +297,52 @@ public class secretCodeFragment extends Fragment {
                 // ...
             }
         };
-        ref.addValueEventListener(postListener);
+        ref.addListenerForSingleValueEvent(postListener);
     }
-//
-//    private void getRemoteShare(String url) {
-//        if (mAuth.getCurrentUser() != null) {
-//            // already signed in
-//            user = mAuth.getCurrentUser();
-//
-//            System.out.println(url);
-//
-//            storage = FirebaseStorage.getInstance();
-//
-//            StorageReference remoteShareLoc = storage.getReference();
-//
-//
-//
-//            remoteShareLoc.child(url).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-//                @Override
-//                public void onSuccess(Uri ur) {
-//                    // Local temp file has been created
-//                    Log.d(TAG, "getting remote share successful");
-//                    System.out.println("Download file successful");
-//                    System.out.println(ur.toString());
-//                }
-//            }).addOnFailureListener(new OnFailureListener() {
-//                @Override
-//                public void onFailure(@NonNull Exception exception) {
-//                    // Handle any errors
-//                }
-//            });
-//
-//            BufferedReader br = null;
-//            String strLine = "";
-
-//            try {
-//                br = new BufferedReader(new FileReader(file.getPath()));
-//                while ((strLine = br.readLine()) != null) {
-//                    System.out.println("file = " + strLine);
-//                }
-//            } catch (FileNotFoundException e) {
-//                System.err.println("Unable to find the file: fileName");
-//            } catch (IOException e) {
-//                System.err.println("Unable to read the file: fileName");
-//            }
-//
-//            return strLine;
-//        }
-//
-//    }
 
 
     public void storeLocalShare(String localShare) {
-
+        System.out.println("Storing Local Share");
 
         sharedpreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
 
         SharedPreferences.Editor editor = sharedpreferences.edit();
         editor.putString("share1", localShare);
         editor.commit();
+
+        System.out.println(sharedpreferences.getString("share1", "none"));
     }
 
     public void storeRemoteShare(String remoteShare) {
-        // Gets the remote share and converts into byte array
-        byte[] share2 = remoteShare.getBytes();
+
+        System.out.println("Storing Remote Share");
+        System.out.println(remoteShare);
 
         // Checks if user is signed in
         if (mAuth.getCurrentUser() != null) {
             // already signed in
             user = mAuth.getCurrentUser();
 
-            //displaying a progress dialog while upload is going on
-//            final ProgressDialog progressDialog = new ProgressDialog(getActivity());
-//            progressDialog.setTitle("Uploading");
-//            progressDialog.show();
-
-
             DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("users").child(mAuth.getCurrentUser().getUid());
 
             //Log.i("seeThisUri", remoteShare);// This is the one you should store
 
-            ref.child("shareURL").setValue(remoteShare);
-
-//            storage = FirebaseStorage.getInstance();
-//            StorageReference remoteShareLoc = storage.getReference().child("user/" + user.getUid() + "/share2.txt");
-
-//            UploadTask uploadTask = remoteShareLoc.putBytes(share2);
-//            uploadTask.addOnFailureListener(new OnFailureListener() {
-//                @Override
-//                public void onFailure(@NonNull Exception exception) {
-//                    progressDialog.dismiss();
-//
-//                    Toast.makeText(getContext(), exception.getMessage(), Toast.LENGTH_LONG).show();
-//                    Log.d(TAG, "Uploading share failed!");
-//                    exception.printStackTrace();
-//                }
-//            }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-//                @Override
-//                public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-//                    //calculating progress percentage
-//                    double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
-//
-//                    //displaying percentage in progress dialog
-//                    progressDialog.setMessage("Uploaded " + ((int) progress) + "%...");
-//                }
-//            })
-//            .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-//
-//
-//                @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-//                @Override
-//                public void onSuccess(final UploadTask.TaskSnapshot taskSnapshot) {
-//                    // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
-//
-//                    progressDialog.dismiss();
-//
-//                    Toast.makeText(getContext(), "File Uploaded ", Toast.LENGTH_LONG).show();
-//
-//                    Log.d(TAG, "Uploading share successful!");
-//                    Log.d(TAG, "File Data: " + taskSnapshot.getMetadata().getContentType());
-//                    Log.d(TAG, "File Data: " + taskSnapshot.getMetadata().getName());
-//                    Log.d(TAG, "File Data: " + taskSnapshot.getMetadata().getPath());
-//
-//
-//                    Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
-//                        @Override
-//                        public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) {
-//                            if (!task.isSuccessful()) {
-//                                Log.i("problem", task.getException().toString());
-//                            }
-//
-//                            return remoteShareLoc.getDownloadUrl();
-//                        }
-//                    }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-//                        @Override
-//                        public void onComplete(@NonNull Task<Uri> task) {
-//                            if (task.isSuccessful()) {
-//                                Uri downloadUri = task.getResult();
-//
-//
-//
-//
-//                            } else {
-//                                Log.i("wentWrong", "downloadUri failure");
-//                            }
-//                        }
-//                    });
-//                }
-//            });
+            ref.child("shareURL").setValue(remoteShare)
+            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    //System.out.println("Remote Share Stored Successful");
+                }
+            })
+            .addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    //System.out.println("Remote Share Stored Unsuccessful");
+                }
+            });
         }
     }
     private void showSecret(String s) {
-        final TextView output = (TextView)view.findViewById(R.id.txt_shareOutput);
         output.setText(s);
     }
 }
