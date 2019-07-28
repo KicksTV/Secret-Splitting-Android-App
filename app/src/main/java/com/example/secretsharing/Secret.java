@@ -6,7 +6,7 @@ import java.util.Random;
 
 public class Secret {
 
-    private ArrayList<String> shares = new ArrayList<>();
+    private ArrayList<String> shares;
 
     private char[] charList =
 
@@ -26,6 +26,12 @@ public class Secret {
 
 
     public ArrayList<String> hideSecret(String secretCode) {
+
+        System.out.println("Hiding Secret");
+
+        shares = new ArrayList<>();
+
+        secretCode = secretCode.toLowerCase();
 
         int length = secretCode.length();
 //        Double num = Math.pow(10, length);
@@ -47,8 +53,8 @@ public class Secret {
 
 
 
-//        System.out.println("SecretCode: " + secretCode);
-//        System.out.println(randomN);
+        //System.out.println("SecretCode: " + secretCode);
+        //System.out.println(numbers[0]);
 
         rand = numbers[0];
 
@@ -81,9 +87,9 @@ public class Secret {
             }
         }
 
-        System.out.println("SecretCode Conversion: " + result);
-//        System.out.println("Share1: " + randomNumShare);
-//        System.out.println("Share2: " + share2);
+        //System.out.println("SecretCode Conversion: " + result);
+        System.out.println("Share1: " + randomNumShare);
+        System.out.println("Share2: " + share2);
 
         shares.add(randomNumShare);
         shares.add(share2);
@@ -94,8 +100,9 @@ public class Secret {
     public String recombindSecret(String share1, String share2) {
         String secret = "";
 
-        System.out.println("Share1 = " + share1);
-        System.out.println("Share2 = " + share2);
+//        System.out.println("Share1 = " + share1);
+//        System.out.println("Share2 = " + share2);
+        System.out.println("Recombinding Secret");
 
 
 
@@ -112,7 +119,7 @@ public class Secret {
             result = result + numResult;
         }
 
-        System.out.println(result);
+        //System.out.println(result);
 
         for (int i=0;i <= result.length()-1; i += 2) {
 
@@ -124,9 +131,9 @@ public class Secret {
             secret += reconstructSecret(s);
         }
 
+        //System.out.println(secret);
+
         System.out.println(secret);
-
-
         return secret;
     }
 
@@ -142,7 +149,7 @@ public class Secret {
 
     public String reconstructSecret(String s) {
 
-        System.out.println(s);
+        //System.out.println(s);
         for (int i=0; i<numberList.length;i++) {
             if (numberList[i].equals(s)) {
                 return "" + charList[i];
