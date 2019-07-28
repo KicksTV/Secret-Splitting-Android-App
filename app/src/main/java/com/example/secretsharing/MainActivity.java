@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -22,18 +23,26 @@ public class MainActivity extends AppCompatActivity {
     String final_pattern = "";
 
     PatternLockView mPatternLockView;
+    Button patternReset;
+    TextView text;
+    boolean ResetPattern = false;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Paper.init(this);
         //  Stores the saved pattern
+
         final String save_pattern = Paper.book().read(save_pattern_key);
 
         // If the pattern has been set
         if (save_pattern != null && !save_pattern.equals("null")) {
             setContentView(R.layout.pattern_screen);
-            mPatternLockView = (PatternLockView)findViewById(R.id.pattern_lock_view);
+            mPatternLockView = findViewById(R.id.pattern_lock_view);
+
+            patternReset = findViewById(R.id.btn_patternReset);
+            text = findViewById(R.id.textView);
+
             mPatternLockView.clearPattern();
             mPatternLockView.addPatternLockListener(new PatternLockViewListener() {
                 @Override
@@ -51,8 +60,14 @@ public class MainActivity extends AppCompatActivity {
                     final_pattern = PatternLockUtils.patternToString(mPatternLockView,pattern);
                     if (final_pattern.equals(save_pattern)) {
                         Toast.makeText(MainActivity.this, "Password correct!", Toast.LENGTH_SHORT).show();
-                        Intent intent=new Intent(MainActivity.this, Authentication.class); // redirecting to pattern_screen.
-                        startActivity(intent);
+                        if (ResetPattern) {
+                            Paper.book().write(save_pattern_key, "null");
+                            Intent intent=new Intent(MainActivity.this, MainActivity.class); // redirecting to pattern_screen.
+                            startActivity(intent);
+                        }else {
+                            Intent intent = new Intent(MainActivity.this, Authentication.class); // redirecting to pattern_screen.
+                            startActivity(intent);
+                        }
                     }else {
                         Toast.makeText(MainActivity.this, "Password incorrect!", Toast.LENGTH_SHORT).show();
                     }
@@ -61,6 +76,21 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onCleared() {
 
+                }
+            });
+
+            patternReset.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (patternReset.getText().equals("Reset Pattern")) {
+                        text.setText("Enter Pattern to RESET!!!");
+                        patternReset.setText("Cancel Reset Pattern");
+                        ResetPattern = true;
+                    }else {
+                        text.setText("Enter Pattern");
+                        patternReset.setText("Reset Pattern");
+                        ResetPattern = false;
+                    }
                 }
             });
 
@@ -98,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
                 public void onClick(View v) {
                     Paper.book().write(save_pattern_key, final_pattern);
                     Toast.makeText(MainActivity.this, "Saved pattern successful!", Toast.LENGTH_SHORT).show();
-                    Intent intent=new Intent(MainActivity.this, PatternScreen.class); // redirecting to pattern_screen.
+                    Intent intent=new Intent(MainActivity.this, MainActivity.class); // redirecting to pattern_screen.
                     startActivity(intent);
                 }
 

@@ -1,6 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        release {
+            storeFile file('C:\\Users\\llewe\\AndroidStudioProjects\\Secret-Splitting-Android-App-\\app\\release\\keystore.jks')
+            storePassword 'Tempomar2012!'
+            keyAlias = 'keystore'
+            keyPassword 'Tempomar2012!'
+        }
+    }
     compileSdkVersion 29
     buildToolsVersion "29.0.0"
     defaultConfig {
@@ -16,6 +24,8 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            debuggable = true
+            signingConfig signingConfigs.release
         }
     }
     compileOptions {

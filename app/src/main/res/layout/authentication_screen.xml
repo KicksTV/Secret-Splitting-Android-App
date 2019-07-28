@@ -50,8 +50,8 @@
         android:text="Login with Google" />
 
     <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="300dp"
+        android:layout_width="423dp"
+        android:layout_height="145dp"
         android:orientation="horizontal">
 
         <Button
