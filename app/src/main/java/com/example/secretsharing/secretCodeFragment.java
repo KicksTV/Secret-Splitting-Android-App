@@ -299,10 +299,6 @@ public class secretCodeFragment extends Fragment {
         };
         ref.addListenerForSingleValueEvent(postListener);
     }
-<<<<<<< HEAD
-
-=======
->>>>>>> a5e31524ee7922ee45f21e793ad918c80752df0e
 
 
     public void storeLocalShare(String localShare) {
@@ -327,19 +323,10 @@ public class secretCodeFragment extends Fragment {
             // already signed in
             user = mAuth.getCurrentUser();
 
-<<<<<<< HEAD
-
-
-=======
->>>>>>> a5e31524ee7922ee45f21e793ad918c80752df0e
             DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("users").child(mAuth.getCurrentUser().getUid());
 
             //Log.i("seeThisUri", remoteShare);// This is the one you should store
 
-<<<<<<< HEAD
-            ref.child("shareURL").setValue(remoteShare);
-
-=======
             ref.child("shareURL").setValue(remoteShare)
             .addOnSuccessListener(new OnSuccessListener<Void>() {
                 @Override
@@ -353,7 +340,6 @@ public class secretCodeFragment extends Fragment {
                     //System.out.println("Remote Share Stored Unsuccessful");
                 }
             });
->>>>>>> a5e31524ee7922ee45f21e793ad918c80752df0e
         }
     }
     private void showSecret(String s) {
